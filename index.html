@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Pinguin</title>
+<script src="hexi.min.js"></script>
+<script src="pixi-spine.min.js"></script>
+<style>
+    body { margin: 0; padding: 0; overflow: hidden; }
+</style>
+  </head>
+  <body>
+      <script>
+
+function getIslandWidth(callback) {
+    var req = new XMLHttpRequest();
+    req.open('GET', 'islandwidth', true);
+    req.onload = function() {
+        if (req.status >= 200 && req.status < 400) {
+            callback(req.responseText);
+        } else {
+            console.warn(req.responseText);
+        }
+    }
+    req.onerror = function() {
+        console.warn("fetch failed");
+    }
+    req.send();
+}
+
+var renderer = PIXI.autoDetectRenderer(800, 600, {antialias: true, backgroundColor : 0x1099bb});
+document.body.appendChild(renderer.view);
+
+// create the root of the stage graph
+var stage = new PIXI.Container();
+var scene = new PIXI.Container();
+scene.scale.x = window.devicePixelRatio;
+scene.scale.y = window.devicePixelRatio;
+stage.addChild(scene);
+
+// load spine data
+PIXI.loader
+    .add('pinguin', 'keizerspinguin.json')
+    .load(onAssetsLoaded);
+
+var pinguin = null;
+var pinguinCage = null;
+var island = null;
+var background = null;
+
+var targetWidth = 800;
+var targetHeight = 600;
+
+var islandCenter = targetWidth / 2;
+var islandRadius = 300;
+
+var lastfetch = 0;
+
+var pinguinSpeed = 0.005;
+
+var resize = function () {
+        window.addEventListener('resize', rendererResize);
+        window.addEventListener('deviceOrientation', rendererResize);
+};
+
+var rendererResize = function () {
+    var width = window.innerWidth,
+        height = window.innerHeight,
+        targetScale;
+
+    /**
+     * Set the renderer.view size and display size
+     * This way we can support retina graphics and make our game really crisp
+     */
+    renderer.view.width = width * window.devicePixelRatio;
+    renderer.view.height = height * window.devicePixelRatio;
+    renderer.view.style.width = width + 'px';
+    renderer.view.style.height = height + 'px';
+
+    /**
+     * Resize the PIXI renderer
+     * Let PIXI know that we changed the size of the viewport
+     */
+    renderer.resize(renderer.view.width, renderer.view.height);
+
+    /**
+     * Scale the renderer.view horizontally and vertically keeping in mind the screen estate we have
+     * at our disposal. This keeps the relative game dimensions in place.
+     */
+     if (height / targetHeight < width / targetWidth) {
+         stage.scale.x = stage.scale.y = height / targetHeight;
+     } else {
+         stage.scale.x = stage.scale.y = width / targetWidth;
+     }
+     
+
+    /**
+     * Some sugar
+     * Set the x horizontal center point of the renderer.view after resizing.
+     * This should be used for engines which calculate object position from anchor 0.5/0.5
+     */
+     stage.x = width - targetWidth * window.devicePixelRatio * stage.scale.x / 2;
+    //stage.pivot.y = -(width * (1 / stage.scale.y) / 2) * window.devicePixelRatio;
+    //stage.pivot.x = -(width * (1 / stage.scale.x) / 2) * window.devicePixelRatio;
+
+    /**
+     * iOS likes to scroll when rotating - fix that 
+     */
+    window.scrollTo(0, 0);
+};
+resize();
+rendererResize();
+
+document.onkeydown = function(evt) {
+    evt = evt || window.event;
+    if (evt.ctrlKey && evt.keyCode == 70) {
+        if(document.documentElement.requestFullscreen) {
+            document.documentElement.requestFullscreen();
+        } else if(document.documentElement.mozRequestFullScreen) {
+            document.documentElement.mozRequestFullScreen();
+        } else if(document.documentElement.webkitRequestFullscreen) {
+            document.documentElement.webkitRequestFullscreen();
+        } else if(document.documentElement.msRequestFullscreen) {
+            document.documentElement.msRequestFullscreen();
+        }
+    }
+};
+
+function onAssetsLoaded(loader,res)
+{
+
+    // instantiate the spine animation
+    pinguin = new PIXI.spine.Spine(res.pinguin.spineData);
+    pinguin.skeleton.setToSetupPose();
+    pinguin.update(0);
+    pinguin.autoUpdate = false;
+
+    // create a container for the spine animation and add the animation to it
+    pinguinCage = new PIXI.Container();
+    pinguinCage.addChild(pinguin);
+
+
+    // measure the spine animation and position it inside its container to align it to the origin
+    var localRect = pinguin.getLocalBounds();
+    pinguin.position.set(-localRect.x, -localRect.y);
+
+    // now we can scale, position and rotate the container as any other display object
+    var scale = Math.min((renderer.width * 0.7) / pinguinCage.width, (renderer.height * 0.7) / pinguinCage.height) * 0.3;
+    pinguinCage.scale.set(scale, scale);
+    pinguinCage.position.set((renderer.width - pinguinCage.width) * 0.5, (renderer.height - pinguinCage.height) * 0.5);
+    pinguinCage.dx = 0;
+    pinguinCage.nextdx = pinguinSpeed * 0.1;
+
+    background = new PIXI.Sprite(PIXI.Texture.fromImage('background.png'));
+    background.y = 0;
+    background.height = 600;
+    background.scale.x = background.scale.y = 600 / 1053;
+    background.x = -(2560 * background.scale.x - 800) / 2;
+    
+    scene.addChild(background);
+    scene.addChild(pinguinCage);
+
+    pinguin.state.onEvent = function(i, event) {
+        console.log(event.stringValue);
+        if (event.stringValue === "flat") {
+            pinguinCage.dx = pinguinCage.nextdx;
+        }
+    };
+
+    // add the container to the stage
+    stage.addChild(pinguinCage);
+
+    // once position and scaled, set the animation to play
+    pinguin.state.setAnimationByName(0, 'animation', true);
+
+    animate();
+}
+
+function animate() {
+    requestAnimationFrame(animate);
+
+    // update the spine animation, only needed if pinguin.autoupdate is set to false
+    pinguin.update(Math.abs(pinguinCage.dx)); 
+    pinguinCage.x += pinguinCage.dx * Math.abs(pinguinCage.width);
+
+    if (Math.abs(pinguinCage.dx) < Math.abs(pinguinCage.nextdx)) {
+        pinguinCage.dx = (10 * pinguinCage.dx + pinguinCage.nextdx) / 11;
+        if (Math.abs(pinguinCage.nextdx) - Math.abs(pinguinCage.dx) < pinguinSpeed * 0.05)
+            pinguinCage.dx = pinguinCage.nextdx;
+    }
+
+    if (pinguinCage.dx == 0) pinguinCage.dx = pinguinCage.nextdx;
+    if (pinguinCage.dx < 0 && pinguinCage.scale.x > 0) {
+        pinguinCage.scale.x = -Math.abs(pinguinCage.scale.x);
+        pinguinCage.x -= pinguinCage.width;
+    }
+    if (pinguinCage.dx > 0 && pinguinCage.scale.x < 0) {
+        pinguinCage.scale.x = Math.abs(pinguinCage.scale.x);
+        pinguinCage.x -= pinguinCage.width;
+    }
+
+    if (pinguinCage.nextdx == 0 && Math.random() < 0.01) {
+        pinguinCage.nextdx = -pinguinSpeed * (pinguinCage.x - islandCenter) / islandRadius;
+        if (pinguinCage.nextdx > 0 && pinguinCage.nextdx < pinguinSpeed * 0.1) pinguinCage.nextdx = pinguinSpeed * 0.1;
+        if (pinguinCage.nextdx < 0 && pinguinCage.nextdx > pinguinSpeed * -0.1) pinguinCage.nextdx = pinguinSpeed * -0.1;
+    }
+
+    if (Math.random() < 0.005) pinguinCage.nextdx = 0;
+
+    renderer.render(stage);
+
+    if (Date.now() - lastfetch > 1000) {
+        lastfetch = Date.now();
+        getIslandWidth(function(width) {
+            islandRadius = width;
+        });
+    }
+}
+
+</script>  
+    <!-- page content -->
+  </body>
+</html>

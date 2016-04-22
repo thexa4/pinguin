@@ -1,0 +1,48 @@
+
+keizerspinguin.png
+size: 2048,1024
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+Layer 1
+  rotate: false
+  xy: 2, 2
+  size: 624, 975
+  orig: 624, 975
+  offset: 0, 0
+  index: -1
+Layer 2
+  rotate: false
+  xy: 1111, 765
+  size: 424, 212
+  orig: 424, 212
+  offset: 0, 0
+  index: -1
+Layer 3
+  rotate: false
+  xy: 628, 401
+  size: 150, 576
+  orig: 150, 576
+  offset: 0, 0
+  index: -1
+Layer 4
+  rotate: false
+  xy: 780, 635
+  size: 329, 342
+  orig: 329, 342
+  offset: 0, 0
+  index: -1
+Layer 5
+  rotate: false
+  xy: 780, 463
+  size: 294, 170
+  orig: 294, 170
+  offset: 0, 0
+  index: -1
+Layer 6
+  rotate: true
+  xy: 628, 229
+  size: 170, 73
+  orig: 170, 73
+  offset: 0, 0
+  index: -1

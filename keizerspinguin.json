@@ -1,0 +1,107 @@
+{
+"skeleton": { "hash": "qD0FXlPkswIBbuSdHPXkWrGJCdk", "spine": "3.1.06", "width": 688.09, "height": 1315.1 },
+"bones": [
+	{ "name": "root" },
+	{ "name": "bone", "parent": "root", "length": 565.05, "x": 851.6, "y": 1580.65, "rotation": 81.33 },
+	{ "name": "bone2", "parent": "bone", "length": 350.81, "x": 556.3, "y": 17.24, "rotation": -12.87 },
+	{ "name": "bone3", "parent": "bone2", "length": 122.95, "x": 346, "y": 11.32, "rotation": -31.92 },
+	{ "name": "bone4", "parent": "bone", "length": 117.58, "x": -119.58, "y": -43.86, "rotation": -156.51 },
+	{ "name": "bone5", "parent": "bone", "length": 103.07, "x": -77.49, "y": -123.53, "rotation": -148.07 },
+	{ "name": "bone6", "parent": "bone", "length": 404.13, "x": 538.6, "y": -89.49, "rotation": -172.62 }
+],
+"slots": [
+	{ "name": "body", "bone": "bone", "attachment": "Layer 1" },
+	{ "name": "neck", "bone": "bone2" },
+	{ "name": "bone2", "bone": "bone2", "attachment": "Layer 4" },
+	{ "name": "head", "bone": "bone3", "attachment": "Layer 5" },
+	{ "name": "wing", "bone": "bone6", "attachment": "Layer 3" },
+	{ "name": "foot2", "bone": "bone5", "attachment": "Layer 6" },
+	{ "name": "foot1", "bone": "bone4", "attachment": "Layer 2" }
+],
+"skins": {
+	"default": {
+		"body": {
+			"Layer 1": { "x": 296.75, "y": -7.15, "rotation": -81.33, "width": 624, "height": 975 }
+		},
+		"bone2": {
+			"Layer 4": { "x": 236.66, "y": -6.08, "rotation": -66.34, "width": 329, "height": 342 }
+		},
+		"foot1": {
+			"Layer 2": { "x": 63.69, "y": 46.16, "rotation": 77.09, "width": 424, "height": 212 }
+		},
+		"foot2": {
+			"Layer 6": { "x": 122.48, "y": 59.44, "rotation": 68.55, "width": 170, "height": 73 }
+		},
+		"head": {
+			"Layer 5": { "x": 106.99, "y": -11.37, "rotation": -32.9, "width": 294, "height": 170 }
+		},
+		"wing": {
+			"Layer 3": { "x": 247.39, "y": 15.77, "rotation": 93.64, "width": 150, "height": 576 }
+		}
+	}
+},
+"events": {
+	"flat": {}
+},
+"animations": {
+	"animation": {
+		"bones": {
+			"bone5": {
+				"rotate": [
+					{ "time": 0, "angle": 14.91 },
+					{ "time": 0.0666, "angle": 327.95 },
+					{ "time": 0.1666, "angle": 12.63 },
+					{ "time": 0.2333, "angle": 311.3 },
+					{ "time": 0.3333, "angle": -3.28 }
+				]
+			},
+			"bone4": {
+				"rotate": [
+					{ "time": 0, "angle": 328.23 },
+					{ "time": 0.0666, "angle": 15.23 },
+					{ "time": 0.1666, "angle": -16.81 },
+					{ "time": 0.2333, "angle": 38.4 },
+					{ "time": 0.3333, "angle": 321.23 }
+				]
+			},
+			"bone6": {
+				"rotate": [
+					{ "time": 0, "angle": 6.89 },
+					{ "time": 0.1666, "angle": -4.97 },
+					{ "time": 0.2333, "angle": 2.23 }
+				]
+			},
+			"bone2": {
+				"rotate": [
+					{ "time": 0, "angle": -3.15 },
+					{ "time": 0.0666, "angle": 2.28 },
+					{ "time": 0.1666, "angle": -7.85 },
+					{ "time": 0.2333, "angle": -14.09 },
+					{ "time": 0.3333, "angle": 3.03 }
+				]
+			},
+			"bone3": {
+				"rotate": [
+					{ "time": 0.0666, "angle": -11.79 },
+					{ "time": 0.1666, "angle": -10.04 },
+					{ "time": 0.2333, "angle": 7.92 },
+					{ "time": 0.3333, "angle": -18.79 }
+				]
+			},
+			"bone": {
+				"rotate": [
+					{ "time": 0.0666, "angle": 2.16 }
+				]
+			},
+			"root": {
+				"rotate": [
+					{ "time": 0.3333, "angle": 0 }
+				]
+			}
+		},
+		"events": [
+			{ "time": 0.1333, "name": "flat", "string": "flat" }
+		]
+	}
+}
+}
