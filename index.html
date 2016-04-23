@@ -54,10 +54,12 @@ var targetHeight = 600;
 
 var islandCenter = targetWidth / 2;
 var islandRadius = 300;
+var desiredIslandRadius = 300;
 
 var lastfetch = 0;
 
 var pinguinSpeed = 0.005;
+var isDead = false;
 
 var resize = function () {
         window.addEventListener('resize', rendererResize);
@@ -100,7 +102,7 @@ var rendererResize = function () {
      * Set the x horizontal center point of the renderer.view after resizing.
      * This should be used for engines which calculate object position from anchor 0.5/0.5
      */
-     stage.x = width - targetWidth * window.devicePixelRatio * stage.scale.x / 2;
+     stage.x = (width - targetWidth * window.devicePixelRatio * stage.scale.x) / 2;
     //stage.pivot.y = -(width * (1 / stage.scale.y) / 2) * window.devicePixelRatio;
     //stage.pivot.x = -(width * (1 / stage.scale.x) / 2) * window.devicePixelRatio;
 
@@ -114,6 +116,7 @@ rendererResize();
 
 document.onkeydown = function(evt) {
     evt = evt || window.event;
+    if (evt.ctrlKey && evt.keyCode == 68) isDead = true;
     if (evt.ctrlKey && evt.keyCode == 70) {
         if(document.documentElement.requestFullscreen) {
             document.documentElement.requestFullscreen();
@@ -127,8 +130,40 @@ document.onkeydown = function(evt) {
     }
 };
 
+var loaderCache = null;
+var resCache = null;
+
+function resetall() {
+
+    isDead = false;
+    //pinguin.skeleton.setToSetupPose();
+    //pinguin.update(0);
+    //pinguin.autoUpdate = false;
+
+    // create a container for the spine animation and add the animation to it
+
+
+    // measure the spine animation and position it inside its container to align it to the origin
+
+    // now we can scale, position and rotate the container as any other display object
+    //   var scale = Math.min((renderer.width * 0.7) / pinguinCage.width, (renderer.height * 0.7) / pinguinCage.height) * 0.3;
+//    pinguinCage.position.set((renderer.width - pinguinCage.width) * 0.5, (renderer.height - pinguinCage.height) * 0.5);
+    pinguinCage.dx = 0;
+    pinguinCage.nextdx = pinguinSpeed * 0.1;
+    pinguinCage.y = 110;
+    pinguinCage.x = 400;
+
+    //island.scale.y = 0.45;
+    
+        pinguinCage.alpha = 1;
+        pinguinCage.rotation = 0;
+}
+
 function onAssetsLoaded(loader,res)
 {
+    loaderCache = loader;
+    resCache = res;
+
 
     // instantiate the spine animation
     pinguin = new PIXI.spine.Spine(res.pinguin.spineData);
@@ -147,13 +182,13 @@ function onAssetsLoaded(loader,res)
 
     // now we can scale, position and rotate the container as any other display object
     //   var scale = Math.min((renderer.width * 0.7) / pinguinCage.width, (renderer.height * 0.7) / pinguinCage.height) * 0.3;
-      var scale = 0.2;
+      var scale = 0.1;
       pinguinCage.scale.set(scale, scale);
 //    pinguinCage.position.set((renderer.width - pinguinCage.width) * 0.5, (renderer.height - pinguinCage.height) * 0.5);
     pinguinCage.dx = 0;
     pinguinCage.nextdx = pinguinSpeed * 0.1;
-    pinguinCage.y = 230;
-    pinguinCage.x = 300;
+    pinguinCage.y = 110;
+    pinguinCage.x = 400;
 
     background = new PIXI.Sprite(PIXI.Texture.fromImage('background.png'));
     background.y = 0;
@@ -164,7 +199,7 @@ function onAssetsLoaded(loader,res)
     island = new PIXI.Sprite(PIXI.Texture.fromImage('ijsberg.png'));
     island.y = 230;
     island.scale.y = 0.45;
-    
+
     scene.addChild(background);
     scene.addChild(island);
     scene.addChild(pinguinCage);
@@ -176,9 +211,6 @@ function onAssetsLoaded(loader,res)
         }
     };
 
-    // add the container to the stage
-    stage.addChild(pinguinCage);
-
     // once position and scaled, set the animation to play
     pinguin.state.setAnimationByName(0, 'animation', true);
 
@@ -188,6 +220,7 @@ function onAssetsLoaded(loader,res)
 function animate() {
     requestAnimationFrame(animate);
 
+    if (!isDead) {
     // update the spine animation, only needed if pinguin.autoupdate is set to false
     pinguin.update(Math.abs(pinguinCage.dx)); 
     pinguinCage.x += pinguinCage.dx * Math.abs(pinguinCage.width);
@@ -214,10 +247,25 @@ function animate() {
         if (pinguinCage.nextdx < 0 && pinguinCage.nextdx > pinguinSpeed * -0.1) pinguinCage.nextdx = pinguinSpeed * -0.1;
     }
 
+    if (Math.abs( pinguinCage.x - 400) - islandRadius > 100) {
+        isDead = true;
+        pinguinCage.y += pinguinCage.height;
+    }
+
     if (Math.random() < 0.005) pinguinCage.nextdx = 0;
+    } else {
+        pinguinCage.y -= 0.1;
+        pinguinCage.alpha = 0.3;
+        pinguinCage.rotation = Math.PI / 2;
+
+        if (pinguinCage.y < -200) {
+            resetall();
+        }
+    }
+
+    islandRadius = (40 * islandRadius + desiredIslandRadius) / 41;
 
     var tmpradius = islandRadius + 30;
-    console.log(tmpradius);
     island.width = 2 * tmpradius;
     island.x = 400 - tmpradius;
 
@@ -226,7 +274,7 @@ function animate() {
     if (Date.now() - lastfetch > 1000) {
         lastfetch = Date.now();
         getIslandWidth(function(width) {
-            islandRadius = parseInt(width);
+            desiredIslandRadius = parseFloat(width);
         });
     }
 }

@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Pinguin Admin</title>
+<style>
+    body { margin: 0; padding: 0; overflow: hidden; }
+    #full { width: 100vw; height: 100vh; background-color: red;  }
+</style>
+  </head>
+  <body id="body" >
+      <script>
+          function onContext(e) { e.stopPropagation(); console.log(e); return false;}
+          body.oncontextmenu = onContext;
+var addedClicks = 0;
+var minWidth = 50;
+var maxWidth = 350;
+
+var width = 350;
+
+setTimeout(step, 1000);
+
+function step() {
+    setTimeout(step, 1000);
+
+    var delta = width - minWidth;
+    width = width - Math.min(0.2, 1 + delta / 120);
+    width += addedClicks * 5;
+    addedClicks = 0;
+
+    if (width > maxWidth) {
+        width = maxWidth;
+    }
+
+    if (width < minWidth) width = minWidth;
+
+    setIslandWidth(width, function(e){});
+
+    document.getElementById("body").innerHTML = "<div id=\"full\">" + width + "</div>";
+    console.log(width);
+}
+
+function setIslandWidth(newWidth, callback) {
+    var req = new XMLHttpRequest();
+    req.open('GET', 'setwidth.php?q=' + newWidth, true);
+    req.onload = function() {
+        if (req.status >= 200 && req.status < 400) {
+            callback(req.responseText);
+        } else {
+            console.warn(req.responseText);
+        }
+    }
+    req.onerror = function() {
+        console.warn("fetch failed");
+    }
+    req.send();
+}
+
+document.onclick = function(evt) {
+    addedClicks++;
+    evt.stopPropagation();
+    return false;
+}
+
+document.onkeydown = function(evt) {
+    evt = evt || window.event;
+    if (evt.ctrlKey && evt.keyCode == 70) {
+        if(document.documentElement.requestFullscreen) {
+            document.documentElement.requestFullscreen();
+        } else if(document.documentElement.mozRequestFullScreen) {
+            document.documentElement.mozRequestFullScreen();
+        } else if(document.documentElement.webkitRequestFullscreen) {
+            document.documentElement.webkitRequestFullscreen();
+        } else if(document.documentElement.msRequestFullscreen) {
+            document.documentElement.msRequestFullscreen();
+        }
+    }
+};
+
+</script>  
+    <!-- page content -->
+  </body>
+</html>
